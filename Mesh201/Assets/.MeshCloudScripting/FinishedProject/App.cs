@@ -4,6 +4,7 @@
 using Azure;
 using Azure.AI.OpenAI;
 using Microsoft.Mesh.CloudScripting;
+using OpenAI.Chat;
 using System.Numerics;
 using System.Text.Json;
 using WeatherAPI;
@@ -20,7 +21,7 @@ namespace CloudScripting.Sample
 
         private readonly string? _weatherAPIBaseUrl;
         private readonly string? _weatherAPIKey;
-        private OpenAIClient _openAIClient;
+        private AzureOpenAIClient _openAIClient;
 
         private string[] _latlong = new string[] { "6.465422,3.406448",     // Lagos, Nigeria
                                                    "47.673988,-122.121513", // Redmond, WA, USA
@@ -78,30 +79,28 @@ namespace CloudScripting.Sample
 
                             string participantInput = response.Result;
 
-                            var chatCompletionsOptions = new ChatCompletionsOptions()
-                            {
-                                DeploymentName = "gpt-35-turbo", // Use DeploymentName for "model" with non-Azure clients
-                                Messages =
-                                {
-                                    // The system message represents instructions or other guidance about how the assistant should behave
-                                    new ChatRequestSystemMessage(
-                                        "You are a helpful assistant." +
+                            ChatClient chatClient = _openAIClient.GetChatClient("my-gpt-35-turbo");
+
+                            // Wait for a response from OpenAI based on the user's message
+                            var aiResponse = await chatClient.CompleteChatAsync(
+                            [
+
+                                    new SystemChatMessage("You are a helpful assistant." +
                                         "You're part of a developer sample for the Mesh Toolkit." +
                                         "Use brief answers, less than 1 paragraph." +
                                         "You can suggest a good location for a wind farm based on current and historical weather data." +
                                         "We're looking at globe with the current weather data displayed for each of these locations:  Lagos Nigeria, Redmond WA USA, Dublin Ireland" +
-                                        "Current weather conditions for these locations:" + _currentWeatherText
-                                        ),
-                                    new ChatRequestUserMessage(participantInput),
-                                }
-                            };
+                                        "Current weather conditions for these locations:" + _currentWeatherText),
+                                    new UserChatMessage(participantInput),
 
-                            // Wait for a response from OpenAI based on the user's message
-                            var aiResponse = await _openAIClient.GetChatCompletionsAsync(chatCompletionsOptions);
+                            ]);
+
+
+
 
                             // Display the first response from the large language model (LLM)
-                            var responseMessage = aiResponse.Value.Choices[0].Message;
-                            _app.ShowMessageToParticipant($"<i>You asked: {participantInput}</i>\n\nResponse: {responseMessage.Content}", args.Participant);
+                            var responseMessage = aiResponse.Value.Content[0];
+                            _app.ShowMessageToParticipant($"<i>You asked: {participantInput}</i>\n\nResponse: {responseMessage.Text}", args.Participant);
                         }
                         catch (Exception ex)
                         {
