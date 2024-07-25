@@ -5,10 +5,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
-
   <ItemGroup>
     <EmbeddedResource Include="scene.map" CopyToOutputDirectory="PreserveNewest" />
-    <PackageReference Include="System.Net.Http" Version="4.3.4" />
     <None Update="mesh.cloudscripting.manifest.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -25,12 +23,10 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
-	
-  <ItemGroup>
-	<PackageReference Include="Azure.AI.OpenAI" Version="1.0.0-beta.15" />
-  </ItemGroup>
-	
   <ItemGroup>
     <Folder Include="WeatherAPI\" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Azure.AI.OpenAI" />
   </ItemGroup>
 </Project>
